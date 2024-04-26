@@ -8,7 +8,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), react, RISING);
 }
 
-void loop()
+void loop() {
 }
 
 void react() {
