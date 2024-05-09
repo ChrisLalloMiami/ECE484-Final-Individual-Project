@@ -41,7 +41,7 @@ const int DEFENDER_SERVO_PIN = 53; // Digital output for flipping up defender
 const int GOALIE_FLIPUP_VALUE = 1; // Flipup when goals >= value
 const int DEFENDER_FLIPUP_VALUE = 3;
 
-const int MINIMUM_POINTS = -1000; // Player loses when points <= value
+const int MINIMUM_POINTS = -200; // Player loses when points <= value
 const unsigned long DEBOUNCE_DELAY = 100; // Debounce for hit detection
 /////////////////////////////////////////////////////////
 
@@ -81,7 +81,7 @@ void setup() {
       delay(0); // Code to compatible with ESP8266 watch dog.
     }
   }
-  DFMini.volume(25);  //Set volume value. From 0 to 30
+  DFMini.volume(30);  //Set volume value. From 0 to 30
   Serial.println("DFPlayer online");
   
   // Setup interrupts for hit detection
@@ -97,6 +97,9 @@ void setup() {
   // Setup digital outputs for activating servos (goalie and defender)
   pinMode(GOALIE_SERVO_PIN, OUTPUT);
   pinMode(DEFENDER_SERVO_PIN, OUTPUT);
+
+  digitalWrite(GOALIE_SERVO_PIN, LOW);
+  digitalWrite(DEFENDER_SERVO_PIN, LOW);
   
   // Setup LCD
   lcd.init();
@@ -126,11 +129,11 @@ void loop() {
      // Look for triggered interrupts
     bool hitDetected = checkForHits();
     // Handle servo flipups
-    if (goals >= GOALIE_FLIPUP_VALUE) {
-      digitalWrite(GOALIE_SERVO_PIN, HIGH);
-    } else if (goals >= DEFENDER_FLIPUP_VALUE) {
-      digitalWrite(GOALIE_SERVO_PIN, HIGH);
+    if (goals >= DEFENDER_FLIPUP_VALUE) {
+//      digitalWrite(GOALIE_SERVO_PIN, HIGH);
       digitalWrite(DEFENDER_SERVO_PIN, HIGH);
+    } else if (goals >= GOALIE_FLIPUP_VALUE) {
+      digitalWrite(GOALIE_SERVO_PIN, HIGH);
     }
     if (!hitDetected) {
       Serial.println("Scheduling audio...");
@@ -203,15 +206,21 @@ bool checkForHits() {
     hitDetected = true;
     // Play goalie save sound
     DFMini.play(2);
-    points -= 50;
+    points -= 5;
     updateDisplay(points, goals);
+
+    // Reset debounce flag
+    goalieHit = false;
   }
   if (defenderHit) {
     hitDetected = true;
     // Play defender save sound
     DFMini.play(2);
-    points -= 15;
+    points -= 10;
     updateDisplay(points, goals);
+
+    // Reset debounce flag
+    defenderHit = false;
   }
   return hitDetected;
 }
