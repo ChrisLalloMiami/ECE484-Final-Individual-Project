@@ -22,6 +22,9 @@ void setup() {
   // initialize the serial port:
   Serial.begin(9600);
 
+  // Setup signal wire for raising servo
+  pinMode(5, INPUT);
+
   // Setup stepper motor
   myStepper.setMaxSpeed(800);
   myStepper.setAcceleration(500);
@@ -34,11 +37,16 @@ void setup() {
 }
 
 void loop() {
+  while (digitalRead(5) == LOW) {
+    // Wait until start...
+  }
   while (digitalRead(2) == HIGH) {
     myStepper.move(-100);
     myStepper.run();
   }
-  flipServo(false);
+  if (digitalRead(5) == HIGH) {
+    flipServo(false);
+  }
   myStepper.moveTo(GOALIE_DISTANCE);
   myStepper.runToPosition();
   myStepper.moveTo(GOALIE_BUFFER);
